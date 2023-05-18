@@ -4,7 +4,23 @@ const CANVAS_WIDTH = canvas.width = 800;
 const CANVAS_HEIGHT = canvas.height = 700;
 
 // setting up the speed of the scrolling speed. Uses 'let' so we can dynamically adjust the game speed.
+
 let gameSpeed = 5;
+
+// gameFrame is referenced in line 55 but doesn't function as well as the code it replaces.
+// let gameFrame = 0;
+
+const slider = document.getElementById('slider');
+slider.value = gameSpeed;
+
+const showGameSpeed = document.getElementById('showGameSpeed');
+showGameSpeed.innerHTML = gameSpeed;
+
+slider.addEventListener('change', function(e){
+    console.log(e.target.value);
+    gameSpeed = e.target.value;
+    showGameSpeed.innerHTML = gameSpeed;
+});
 
 const backgroundLayer1 = new Image();
 backgroundLayer1.src= '../assets/background_layer/layer-1.png';
@@ -23,29 +39,26 @@ class Layer {
         this.y = 0;
         this.width = 2400;
         this.height = 700;
-        // used for doubling the image to aid in infinite scrolling
-        this.x2 = this.width;
         this.image = image;
         this.speedModifier = speedModifier;
         this.speed = gameSpeed * this.speedModifier;
     }
-
-    // this makes sure that the image redraws once it reaches the end of the image
     update(){
         this.speed = gameSpeed * this.speedModifier;
+
         if (this.x <= -this.width){
-            this.x = this.width + this.x2 - this.speed;
-        }
-        if (this.x2 <= -this.width){
-            this.x2= this.width + this.x - this.speed;
+            this.x = 0;
         }
         this.x = Math.floor(this.x - this.speed);
-        this.x2 = Math.floor(this.x2 - this.speed);
+
+        // line 53 functions similarly as lines 47-50. The disadvantage is that when you change the game speed it recalculates the frame data and causes the background to jump around.
+        // this.x = gameFrame * this.speed % this.width;
+
     }
-    // this draws the image twice so that you can infinitely scroll
+    // this draws the image twice. You need to do this so that when the image reaches the end, it draws a second image so you don't see empty space or an image reset.
     draw() {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        ctx.drawImage(this.image, this.x2, this.y, this.width, this.height);
+        ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
     }
 }
 
@@ -67,6 +80,7 @@ function animateBG() {
         object.draw();
     })
 
+    // gameFrame--;
     requestAnimationFrame(animateBG);
 };
 
